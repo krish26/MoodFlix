@@ -17,7 +17,7 @@ staticfiles/
 media/
 
 # ignore ML files
-/data/*.pkl
+/Data/*.pkl
 
 
 # IDE
