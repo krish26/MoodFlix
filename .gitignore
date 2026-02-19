@@ -16,9 +16,9 @@ db.sqlite3-journal
 staticfiles/
 media/
 
-# Data files
-*.csv
-*.pkl
+# ignore ML files
+/data/*.pkl
+
 
 # IDE
 .vscode/
