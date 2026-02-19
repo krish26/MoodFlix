@@ -31,3 +31,5 @@ Thumbs.db
 
 # Environment
 .movieEnv
+Data/moodflix.pkl
+Data/ml_model.pkl
