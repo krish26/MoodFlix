@@ -21,8 +21,6 @@ class Movie(models.Model):
     vote_count = models.IntegerField()
     popularity = models.FloatField()
     
-    poster_path = models.CharField(max_length=200, null=True, blank=True)
-    
     # Store genres and cast as JSON
     genres = JSONField(default=list)  # List of genre names
     cast = JSONField(default=list)    # List of actor names

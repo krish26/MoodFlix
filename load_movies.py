@@ -50,7 +50,6 @@ def load_movies_from_pickle(pickle_path='Data/processed_movies.pkl'):
                 vote_average=float(row['vote_average']),
                 vote_count=int(row['vote_count']),
                 popularity=float(row.get('popularity', 0)),
-                poster_path=row.get('poster_path', ''),
                 genres=row.get('genre_names', []) if isinstance(row.get('genre_names'), list) else [],
                 cast=row.get('cast_names', []) if isinstance(row.get('cast_names'), list) else [],
                 director=row.get('director', ''),

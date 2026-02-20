@@ -8,6 +8,11 @@ import os
 import pickle
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+import requests
+
+
+TMDB_API_KEY = "f1c2574ff595316f099a277d206ba900"
+TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 
 # Global data
 _movies_df = None
@@ -62,6 +67,23 @@ def format_movie_row(movie_row):
         "director": movie_row.get("director", ""),
         "poster_path": movie_row.get("poster_path", ""),
     }
+
+
+# ---------------------------
+# Utility: TMDB API search (fallback)
+def fetch_movie_poster(title):
+    params = {
+        "api_key": TMDB_API_KEY,
+        "query": title
+    }
+
+    response = requests.get(TMDB_SEARCH_URL, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        if data["results"]:
+            return data["results"][0].get("poster_path")
+    return None
 
 
 # ---------------------------
@@ -177,7 +199,18 @@ def get_recommendations(request):
         )
 
         # ✅ Use .loc instead of .iloc
-        recommendations = [format_movie_row(movies_df.loc[idx]) for idx in recommended_indices]
+        recommendations = []
+
+        for idx in recommended_indices:
+            movie = format_movie_row(movies_df.loc[idx])
+
+            # Fetch poster from TMDB
+            poster_path = fetch_movie_poster(movie["title"])
+
+            movie["poster_path"] = poster_path
+
+            recommendations.append(movie)
+
 
         return JsonResponse({
             "success": True,
