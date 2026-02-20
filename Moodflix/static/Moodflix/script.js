@@ -1,5 +1,6 @@
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 let selectedMood = null;
+let currentOffset = 0;
 
 const moodData = {
     happy: { icon: 'bi-emoji-smile', name: 'Happy' },
@@ -27,27 +28,40 @@ function renderMoods() {
             document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
             selectedMood = mood;
+            currentOffset = 0;  // Reset offset when selecting a new mood
             document.getElementById('getRecommendationsBtn').disabled = false;
         };
     });
 }
 
 async function getRecommendations() {
+    console.log("Button clicked");
+
     if (!selectedMood) return;
+
     showLoading();
 
-    // Example API call (replace with your backend)
     const response = await fetch('/recommendations/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood: selectedMood, count: 10 })
+        headers: {
+            'Content-Type': 'application/json',
+            
+        },
+        body: JSON.stringify({
+            mood: selectedMood,
+            count: 10,
+            offset: currentOffset
+        })
     });
+
     const data = await response.json();
 
     if (data.success) {
         displayResults(data.recommendations, selectedMood.toUpperCase() + " Picks");
+        currentOffset += 10;  // 🔥 move to next batch
     }
 }
+
 
 function displayResults(movies, title) {
     document.getElementById('emptyState').style.display = 'none';
@@ -85,6 +99,24 @@ function displayResults(movies, title) {
 }
 
 
+async function getSurpriseRecommendations() {
+    showLoading();
+
+    const response = await fetch('/surprise/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 10 })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        displayResults(data.recommendations, "Surprise Picks 🎲");
+    }
+}
+
+
+
 function showLoading() {
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('resultsArea').style.display = 'none';
@@ -97,6 +129,6 @@ function scrollHorizontally(id, amount) {
 }
 
 document.getElementById('getRecommendationsBtn').addEventListener('click', getRecommendations);
-document.getElementById('surpriseMeBtn').addEventListener('click', getRecommendations);
+document.getElementById('surpriseMeBtn').addEventListener('click', getSurpriseRecommendations);
 
 renderMoods();

@@ -11,6 +11,10 @@ from sklearn.preprocessing import MinMaxScaler
 import requests
 
 
+from .models import Movie
+
+
+
 TMDB_API_KEY = "f1c2574ff595316f099a277d206ba900"
 TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 
@@ -185,7 +189,9 @@ def get_moods(request):
 def get_recommendations(request):
     data = json.loads(request.body)
     mood = data.get("mood")
-    count = data.get("count", 5)
+    count = int(data.get("count", 10))
+    offset = int(data.get("offset", 0))
+
     diversity = data.get("diversity", 0.3)
 
     if not mood:
@@ -195,8 +201,10 @@ def get_recommendations(request):
         movies_df, content_matrix, cosine_sim_matrix, scaler = load_ml_model()
 
         recommended_indices = get_mood_based_recommendations_proc(
-            movies_df, cosine_sim_matrix, scaler, mood, n=count, diversity_factor=diversity
+            movies_df, cosine_sim_matrix, scaler, mood, n=offset+count, diversity_factor=diversity
         )
+        recommended_indices = recommended_indices[offset:offset + count]
+
 
         # ✅ Use .loc instead of .iloc
         recommendations = []
@@ -221,3 +229,57 @@ def get_recommendations(request):
         })
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_surprise_recommendations(request):
+    """
+    Get surprise movie recommendations using the ML model.
+    Uses only the dataframe, no DB lookup needed.
+    """
+    try:
+        data = json.loads(request.body)
+        count = int(data.get('count', 5))  # default 5 recommendations
+
+        # Load ML model and movies dataframe
+        ml_model, movies_df = load_ml_model()
+
+        # Get recommended indices using ML
+        recommended_indices = ml_model.get_surprise_recommendations(n=count)
+
+        # Build recommendations from dataframe
+        recommendations = []
+        for idx in recommended_indices:
+            movie_row = movies_df.loc[idx]
+            movie_data = {
+                "id": int(movie_row.get("id", 0)),
+                "title": movie_row.get("title", ""),
+                "overview": movie_row.get("overview", ""),
+                "genres": movie_row.get("genre_names", []),
+                "rating": float(movie_row.get("vote_average", 0)),
+                "vote_count": int(movie_row.get("vote_count", 0)),
+                "release_date": str(movie_row.get("release_date", "")),
+                "runtime": int(movie_row["runtime"]) if movie_row.get("runtime") else None,
+                "cast": movie_row.get("cast_names", [])[:5] if movie_row.get("cast_names") else [],
+                "director": movie_row.get("director", ""),
+                "poster_path": movie_row.get("poster_path", "")
+            }
+            recommendations.append(movie_data)
+
+        return JsonResponse({
+            "success": True,
+            "type": "surprise",
+            "count": len(recommendations),
+            "recommendations": recommendations,
+            "ml_powered": True
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+    except Exception as e:
+        print("ERROR:", e)
+        raise e
