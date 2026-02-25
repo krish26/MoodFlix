@@ -242,8 +242,6 @@ If you encounter any issues or have questions:
 - Check existing issues for solutions
 - Review the Django documentation
 
----
 
-**Note**: This project is for educational purposes. Make sure to check movie licensing and data usage rights when deploying to production.
 
 Happy watching! 🍿🎬
