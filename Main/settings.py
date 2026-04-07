@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-y8th*v+@$^fgj)wmps9)gu@l(c2bt_&qd8_ygm7jk2*dtv^1ye
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mymoodflix-a3cjhehshgefaafe.swedencentral-01.azurewebsites.net',
+]
 
 
 # Application definition
