@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-y8th*v+@$^fgj)wmps9)gu@l(c2bt_&qd8_ygm7jk2*dtv^1ye
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'mymoodflix-a3cjhehshgefaafe.swedencentral-01.azurewebsites.net',
+    'mymoodflix-a3cjhehshgefaafe.swedencentral-01.azurewebsites.net','127.0.0.1', 'localhost'
 ]
 
 
@@ -60,15 +60,11 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'OPTIONS': {
-            # 'context_processors': [
-            #     'django.template.context_processors.request',
-            #     'django.contrib.auth.context_processors.auth',
-            #     'django.contrib.messages.context_processors.messages',
-            # ],
-            'OPTIONS': {
-            'driver': 'ODBC Driver 18 for SQL Server',
-            'extra_params': 'Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=30;'
-}
+            'context_processors': [
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
         },
     },
 ]
@@ -89,11 +85,11 @@ DATABASES = {
         'NAME': 'free-sql-db-1196900',
         'USER': 'agasya',
         'PASSWORD': 'Koumudi@26',
-        'HOST': 'moodflix1.database.windows.net',
+        'HOST': 'moodflix1.database.windows.net',  # Azure SQL
         'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 18 for SQL Server',
-            'extra_params': 'Encrypt=yes;TrustServerCertificate=no;'
+            'extra_params': 'Encrypt=yes;TrustServerCertificate=yes;Connection Timeout=60;',
         },
     }
 }
